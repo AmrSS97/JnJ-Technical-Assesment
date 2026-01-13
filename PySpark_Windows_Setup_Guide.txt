@@ -13,6 +13,28 @@
 
 - We need to install Java, preferably Java 8 as it is the most compatible with Spark, and same as Python just google Java download or use the link: https://www.oracle.com/java/technologies/downloads/#java8 to download the JDK then just install it and follow the steps then simply run "Java -version" on the powershell/cmd and if your installation went smoothly there should be no errors and some info about Java version you installed should appear as an output.
 
-- To make sure everything works fine, we need to install Apache Spark bineries pre-built for the Hadoop version that we will link to (for example Hadoop 3.X). Same thing, google Spark download or use this link: https://spark.apache.org/downloads.html to download the Spark package and make sure you know its version of Hadoop it is compatible with. (it should be mentioned in the name of the package)
+- To make sure everything works fine, we need to install Apache Spark binaries pre-built for the Hadoop version that we will link to (for example Hadoop 3.X). Same thing, google Spark download or use this link: https://spark.apache.org/downloads.html to download the Spark package and make sure you know its version of Hadoop it is compatible with. (it should be mentioned in the name of the package)
 
-- 
+- Hadoop bineries need to be configured as well, however in that case we will rely this time on a widely used trusted Github mirror for Hadoop Windows binaries as Hadoop community never officially packaged Windows binaries so most people rely on this repo: https://github.com/steveloughran/winutils This repo is maintained by a Hadoop committer and is considered the de-facto standard.
+
+4. Directories & Environment Variables
+
+- We will need to create simple directories for our binary files, and then make sure that the environment variables are configured correctly so that everything works fine. Start by creating a simple directory called for example "spark" in your C drive then add all the folders and files extracted from the Spark package that you downloaded earlier.
+
+- Same goes for Hadoop, create a simple directory in your C drive, called hadoop for example then create a folder inside it called "bin" then after downloading the repository we mentioned zip file and extracting it, make sure to open the folder that marks the same version compatible with your Spark package like for example if your package name was " spark-4.1.1-bin-hadoop3.tgz" then you should open hadoop-3.0.0 folder then ONLY copy the winutils.exe file and paste it in the bin folder you created earlier
+
+- Spark needs to locate Java, its own binaries, and Hadoop utilities at runtime therefore we need to create some environment variables so that Spark can be able to do that. Simply open your powershell/cmd and run the below commands:
+     - setx JAVA_HOME <path_to_your_JDK_between_double_quotations>
+     - setx HADOOP_HOME <path_to_your_hadoop_directory_in_C_drive>
+       setx PATH "%PATH%;<path_to_bin_folder_in_hadoop_folder>"
+     - setx SPARK_HOME <path_to_spark_directory_in_C_drive>
+       setx PATH "%PATH%;<path_to_bin_folder_in_spark_directory>"
+
+- By running the previous commands, environment variables for the dependencies were created for Spark to use. However, the last step that needs to be done is creating the spark-env.cmd file which is a bat file that Spark runs during runtime, keeping its settings local & versioned. Create a new configuration or bat file called spark-env with .cmd extention and add the content of the same file with the sampe name I pushed in the repository in the Shared_Resources folder.
+
+5. Validation & Testing
+
+- To make sure everything was configured correctly, open a new powershell/cmd and run the command "spark-submit --version" it should output a welcoming window with the name Spark, ready to execute Pythone scripts that uses PySpark interface and related libraries.
+
+Note: again this is for Windows OS not Linux although the steps are similar yet there are differences.
+
