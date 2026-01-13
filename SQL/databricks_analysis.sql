@@ -12,5 +12,5 @@ SELECT
     SUM(CASE WHEN reason = 'Unplanned Breakdown' THEN 1 ELSE 0 END)
                                    AS unplanned_breakdowns, -- calculating the total number of unplanned breakdowns --
     AVG(downtime_min)              AS avg_downtime_per_event -- calculating the average of the downtime per event --
-FROM maintenance_events
-WHERE downtime_minutes IS NOT NULL;
+FROM `j&j`.maintenance_events
+WHERE downtime_min IS NOT NULL;
