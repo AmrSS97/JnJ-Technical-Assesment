@@ -27,7 +27,7 @@ def main(csv_path: str, sql_file: str):
     #Stopping the SparkSession
     spark.stop()
 
-#Validating 3 arguments are passed otherwise output a the prompt passed in the SystemExit method
+#Validating 3 arguments are passed otherwise output the prompt passed in the SystemExit method
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         raise SystemExit("Usage: spark-submit run_spark_sql.py '<csv_path>' '<sql_file>'")
