@@ -1,2 +1,18 @@
 -- PySpark Installation & Configuration Guide --
+-- This is a step-by-step guidance file to install & configure PySpark correctly to avoid any technical issues --
 
+1. Python Installation
+
+- In order to use PySpark, we need to install Python & pip on our local machine. Just simply google how to download Python or use this link: https://www.python.org/downloads/ and download the Python install manager & follow the steps then make a quick check by running "python --version" command in the powershell/cmd or terminal in case of linux and the output should be something like "Python 3.X.X". Same goes for pip.
+
+2. PySpark Installation
+
+- Next we use pip to install PySpark interface by running the command "pip install pyspark" However, there are other dependencies we need to install then we will make sure that PySpark was installed successfully as the interface is installed but Spark won't still work on Windows.
+
+3. Java, Spark bineries & Hadoop
+
+- We need to install Java, preferably Java 8 as it is the most compatible with Spark, and same as Python just google Java download or use the link: https://www.oracle.com/java/technologies/downloads/#java8 to download the JDK then just install it and follow the steps then simply run "Java -version" on the powershell/cmd and if your installation went smoothly there should be no errors and some info about Java version you installed should appear as an output.
+
+- To make sure everything works fine, we need to install Apache Spark bineries pre-built for the Hadoop version that we will link to (for example Hadoop 3.X). Same thing, google Spark download or use this link: https://spark.apache.org/downloads.html to download the Spark package and make sure you know its version of Hadoop it is compatible with. (it should be mentioned in the name of the package)
+
+- 
