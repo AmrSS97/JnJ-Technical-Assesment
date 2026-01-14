@@ -174,7 +174,11 @@ def clean_manufacturing(df: DataFrame) -> DataFrame:
     out = out.dropDuplicates(["timestamp_ts", "factory_id", "line_id", "order_id", "product_id"])
     return out
 
+"""
+The same data cleaning & transformation operations used on the first DataFrame
+where used here.
 
+"""
 def clean_events(df: DataFrame) -> DataFrame:
     out = (
         df
@@ -199,7 +203,12 @@ def clean_events(df: DataFrame) -> DataFrame:
     out = out.dropDuplicates(["event_id"])
     return out
 
+"""
 
+The same data cleaning & transformation operations used on the first & 
+second DataFrames where used here except for Deduplication.
+
+"""
 def clean_operators(df: DataFrame) -> DataFrame:
     out = (
         df
@@ -346,9 +355,9 @@ def build_fact_table(df_mfg: DataFrame, df_events: DataFrame, df_ops: DataFrame)
     return fact
 
 
-# -----------------------------
-# Write outputs
-# -----------------------------
+# ----------------------------------
+# Writing output CSV & Parquet files
+# ----------------------------------
 def write_outputs(df_fact: DataFrame, out_dir: str, csv_coalesce: int) -> None:
     out_dir = out_dir.rstrip("/\\")
     parquet_path = f"{out_dir}/fact_table_parquet"
@@ -368,18 +377,19 @@ def write_outputs(df_fact: DataFrame, out_dir: str, csv_coalesce: int) -> None:
 
 
 # -----------------------------
-# Main function/method which is the starting point of our code
+# Main function/method
 # -----------------------------
 def main():
+    # Configuring the parser for the arguments that will be passed
     parser = argparse.ArgumentParser(description="Task 3 PySpark pipeline for 3 CSV sources -> fact table.")
     parser.add_argument("--mfg", required=True, help="Path to manufacturing_factory_dataset.csv (or wildcard/folder)")
     parser.add_argument("--events", required=True, help="Path to maintenance_events.csv")
     parser.add_argument("--operators", required=True, help="Path to operators_roster.csv")
     parser.add_argument("--out", required=True, help="Output directory (e.g., out/)")
-    parser.add_argument("--csv-coalesce", type=int, default=1,
-                        help="Number of output CSV partitions (1 = single CSV part file). Use 0 to disable.")
+    parser.add_argument("--csv-coalesce", type=int, default=1, help="Number of output CSV partitions (1 = single CSV part file). Use 0 to disable.")
     args = parser.parse_args()
-
+    
+    # Creating a new SparkSession instance
     spark = SparkSession.builder \
             .appName("Task3-DataPipeline-FactTable") \
             .config("spark.hadoop.io.native.lib.available", "false").getOrCreate()
@@ -399,16 +409,19 @@ def main():
     
     # Building an analytics-read fact DataFrame to be exported as CSV & Parquet files
     fact = build_fact_table(df_mfg, df_events, df_ops)
-
+    
+    # Printing/Logging the number of rows for each DataFrame/Table
     print("Rows - manufacturing (clean):", df_mfg.count())
     print("Rows - events (clean):", df_events.count())
     print("Rows - operators (clean):", df_ops.count())
     print("Rows - fact:", fact.count())
-
+    
+    # Saving the fact table in a CSV & a Parquet file by using the write_outputs() function
     write_outputs(fact, args.out, args.csv_coalesce)
-
+    
+    # Stopping the Spark Session instance
     spark.stop()
 
-
+# The starting point of our script where the main() function is called
 if __name__ == "__main__":
     main()
