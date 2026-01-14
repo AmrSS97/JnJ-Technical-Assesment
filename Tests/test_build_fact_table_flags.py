@@ -83,11 +83,11 @@ def test_build_fact_sets_flags_and_joins_operator(spark):
     ops_rows = [
         Row(
             operator_id="OP1",
-            operator_name="Alice",
-            operator_team="T1",
-            operator_skill_level="Senior",
-            operator_reliability_score=0.99,
-            operator_hourly_rate_eur=50.0,
+            name="Alice",
+            team="T1",
+            skill_level="Senior",
+            reliability_score=0.99,
+            hourly_rate_eur=50.0,
             hire_date="2024-01-01",
             factory_id="F1",
             primary_line="L1",
