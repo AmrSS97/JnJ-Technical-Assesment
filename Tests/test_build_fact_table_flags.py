@@ -1,7 +1,7 @@
 from pyspark.sql import Row
 from pyspark.sql import functions as F
 
-from PySpark.pipeline import clean_manufacturing, clean_events, clean_operators, build_fact
+from PySpark.pipeline import clean_manufacturing, clean_events, clean_operators, build_fact_table
 
 
 def test_build_fact_sets_flags_and_joins_operator(spark):
@@ -98,7 +98,7 @@ def test_build_fact_sets_flags_and_joins_operator(spark):
     df_events = clean_events(spark.createDataFrame(events_rows))
     df_ops = clean_operators(spark.createDataFrame(ops_rows))
 
-    fact = build_fact(df_mfg, df_events, df_ops)
+    fact = build_fact_table(df_mfg, df_events, df_ops)
 
     rows = fact.select(
         "order_id",
