@@ -140,10 +140,10 @@ clean_manufacturing(df) takes the raw manufacturing CSV and produces a DataFrame
 
 * Therefore the data cleaning & transformation operations are:
   1- Parsing fields with timestamps & dates to Spark timestamps & dates (avoiding malformation & blank values)
-  2- Normalizing fields with string type by removing whitespaces, make them all with the same case (lower)
+  2- Normalizing fields with string type by removing whitespaces & making them all with the same case (lower)
   3- Replace null numeric metrics with 0 (or 0.0) using coalesce() function
   4- Validating that required key fields don't have nulls
-  5- Every row is uniquely identified by the fields passed to the dropDuplicates() function
+  5- Every row is uniquely identified by the fields passed to the dropDuplicates() function (Deduplication)
 
 """
 def clean_manufacturing(df: DataFrame) -> DataFrame:
@@ -383,17 +383,21 @@ def main():
     spark = SparkSession.builder \
             .appName("Task3-DataPipeline-FactTable") \
             .config("spark.hadoop.io.native.lib.available", "false").getOrCreate()
-
+    
+    # Calling the schemas function to create the 3 schemas for the 3 CSV files
     mfg_schema, events_schema, ops_schema = schemas()
-
+    
+    # Reading the 3 CSV files into 3 DataFrames based on the directory paths provided & schemas
     df_mfg_raw = read_csv(spark, args.mfg, mfg_schema)
     df_events_raw = read_csv(spark, args.events, events_schema)
     df_ops_raw = read_csv(spark, args.operators, ops_schema)
-
+    
+    # Processing the raw DataFrames into cleaned & transformed new DataFrames
     df_mfg = clean_manufacturing(df_mfg_raw)
     df_events = clean_events(df_events_raw)
     df_ops = clean_operators(df_ops_raw)
-
+    
+    # Building an analytics-read fact DataFrame to be exported as CSV & Parquet files
     fact = build_fact_table(df_mfg, df_events, df_ops)
 
     print("Rows - manufacturing (clean):", df_mfg.count())
