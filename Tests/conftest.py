@@ -5,7 +5,6 @@ from pyspark.sql import SparkSession
 def spark():
     spark = (
         SparkSession.builder
-        .master("local[2]")
         .appName("pipeline-unit-tests")
         .config("spark.ui.enabled", "false")
         .getOrCreate()
