@@ -27,7 +27,9 @@ from pyspark.sql.window import Window
 
 
 # -----------------------------
-# Schemas (avoid infer surprises)
+# Schemas (avoid infer surprises which means we didn't depend on Spark to decide the data types).
+# StructType & StructField methods are used to construct the schema for each csv file.
+# StructType takes a list of StructField objects representing all the fields in the csv file with their types & if they are nullable.
 # -----------------------------
 def schemas() -> Tuple[StructType, StructType, StructType]:
     mfg_schema = StructType([
@@ -94,7 +96,9 @@ def schemas() -> Tuple[StructType, StructType, StructType]:
 
 
 # -----------------------------
-# Read functions
+# Read csv files function
+# A SparkSession object starts reading a csv file based on the file path & schema passed.
+# Permissive mode is on which is the default error-handling mode therefore no need to add it explicitly -> (Just For Documentation)
 # -----------------------------
 def read_csv(spark: SparkSession, path: str, schema: StructType) -> DataFrame:
     return (
@@ -107,12 +111,41 @@ def read_csv(spark: SparkSession, path: str, schema: StructType) -> DataFrame:
 
 
 # -----------------------------
-# Cleaning / transformations
+# Data Cleaning / Transformations
 # -----------------------------
+
+"""
+normalize_str() typically does some combination of:
+
+- trim() whitespace
+
+- convert to lowercase / uppercase
+
+- convert empty strings to null
+
+"""
 def normalize_str(col: F.Column) -> F.Column:
     return F.lower(F.trim(col))
 
+"""
+clean_manufacturing(df) takes the raw manufacturing CSV and produces a DataFrame that is:
 
+- typed correctly (timestamp/date)
+
+- string-normalized for consistent grouping/joining
+
+- safe for metrics (nulls → 0, negatives removed)
+
+- deduplicated at the intended “natural grain”
+
+* Therefore the data cleaning & transformation operations are:
+  1- Parsing fields with timestamps & dates to Spark timestamps & dates (avoiding malformation & blank values)
+  2- Normalizing fields with string type by removing whitespaces, make them all with the same case (lower)
+  3- Replace null numeric metrics with 0 (or 0.0) using coalesce() function
+  4- Validating that required key fields don't have nulls
+  5- Every row is uniquely identified by the fields passed to the dropDuplicates() function
+
+"""
 def clean_manufacturing(df: DataFrame) -> DataFrame:
     out = (
         df
@@ -335,7 +368,7 @@ def write_outputs(df_fact: DataFrame, out_dir: str, csv_coalesce: int) -> None:
 
 
 # -----------------------------
-# Main
+# Main function/method which is the starting point of our code
 # -----------------------------
 def main():
     parser = argparse.ArgumentParser(description="Task 3 PySpark pipeline for 3 CSV sources -> fact table.")
@@ -347,7 +380,9 @@ def main():
                         help="Number of output CSV partitions (1 = single CSV part file). Use 0 to disable.")
     args = parser.parse_args()
 
-    spark = SparkSession.builder.appName("Task3-DataPipeline-FactTable").config("spark.hadoop.io.native.lib.available", "false").getOrCreate()
+    spark = SparkSession.builder \
+            .appName("Task3-DataPipeline-FactTable") \
+            .config("spark.hadoop.io.native.lib.available", "false").getOrCreate()
 
     mfg_schema, events_schema, ops_schema = schemas()
 
