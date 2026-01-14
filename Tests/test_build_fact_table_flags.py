@@ -76,6 +76,7 @@ def test_build_fact_sets_flags_and_joins_operator(spark):
             reason="Failure",
             outcome="Fixed",
             cost_eur=100.0,
+            next_due_date="2025-01-15",
         )
     ]
 
