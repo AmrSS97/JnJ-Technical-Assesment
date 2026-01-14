@@ -73,7 +73,7 @@ def test_build_fact_sets_flags_and_joins_operator(spark):
             end_time="2025-01-01 09:00:00",
             downtime_min=60,
             maintenance_type="Corrective",
-            reason="Failure",
+            reason="Unplanned Breakdown",
             outcome="Fixed",
             cost_eur=100.0,
             next_due_date="2025-01-15",
