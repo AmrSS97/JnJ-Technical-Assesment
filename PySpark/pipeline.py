@@ -11,8 +11,6 @@ Outputs:
 - fact_table in Parquet
 - fact_table in CSV
 
-Run (Windows CMD/PowerShell):
-  spark-submit pipeline.py --mfg manufacturing_factory_dataset.csv --events maintenance_events.csv --operators operators_roster.csv --out out --csv-coalesce 1
 """
 
 import argparse
@@ -228,11 +226,11 @@ def clean_operators(df: DataFrame) -> DataFrame:
 
 
 # -----------------------------
-# Build fact table
+# Build analytic-ready fact table
 # -----------------------------
 def build_fact_table(df_mfg: DataFrame, df_events: DataFrame, df_ops: DataFrame) -> DataFrame:
-    # 1) Prepare operator dimension and RENAME overlapping columns (factory_id, etc.)
-    # This prevents ambiguous references after the join.
+    # Prepare operator dimension and RENAME overlapping columns (factory_id, etc.)
+    # This prevents ambiguous references or shadowing issues after the join.
     ops_dim = (
         df_ops.select(
             F.col("operator_id"),
@@ -248,24 +246,29 @@ def build_fact_table(df_mfg: DataFrame, df_events: DataFrame, df_ops: DataFrame)
         )
     )
 
-    # 2) Join manufacturing to operators (simple equi-join)
+    # Join manufacturing DataFrame to operators dimension (simple equi-join or normal equality join)
     mfg_ops = df_mfg.join(ops_dim, on="operator_id", how="left")
 
-    # 3) Time-window join to maintenance events (non-equi join)
-    # Condition: same factory & line AND mfg timestamp within event window
+    # Time-window join to maintenance events (non-equi join)
+    # Condition: same factory & line AND manufacturing timestamp within maintenance event window
+    # m alias used for mfg_ops DataFrame & e alias used for df_events DataFrame
     cond = (
         (F.col("m.factory_id") == F.col("e.factory_id")) &
         (F.col("m.line_id") == F.col("e.line_id")) &
         (F.col("m.timestamp_ts") >= F.col("e.start_ts")) &
         (F.col("m.timestamp_ts") <= F.col("e.end_ts"))
     )
-
+    
+    # Left joined the two DataFrames based on the condition declared
     joined = (
         mfg_ops.alias("m")
         .join(df_events.alias("e"), on=cond, how="left")
     )
 
-    # If multiple events overlap, pick the most recent event by start_ts
+    # Create a stable row identifier for each manufacturing record
+    # If multiple maintenance events overlap, pick the most recent event by start_ts
+    # Builds a deterministic string key using several columns that define a manufacturing row.
+    # Hashes it with sha2(..., 256) to create a fixed-length ID.
     row_id = F.sha2(
         F.concat_ws(
             "||",
@@ -277,7 +280,20 @@ def build_fact_table(df_mfg: DataFrame, df_events: DataFrame, df_ops: DataFrame)
         ),
         256,
     )
+    
+    """
+    - Defines a window partitioned by _mfg_row_id 
+    (so all duplicates of the same manufacturing record are grouped together).
 
+    - Sorts candidate events by e.start_ts descending (newest start first).
+    - Assigns a row number within each partition.
+    - Keeps only _rn == 1, i.e. the event with the latest start_ts.
+    - Uses desc_nulls_last() so that:
+      - if there is an event, it will rank above nulls
+      - if there is no matching event, the row still survives (left join behavior), 
+      and the null-event row becomes the only one and gets _rn = 1
+
+    """
     joined = joined.withColumn("_mfg_row_id", row_id)
     w = Window.partitionBy("_mfg_row_id").orderBy(F.col("e.start_ts").desc_nulls_last())
 
@@ -289,6 +305,7 @@ def build_fact_table(df_mfg: DataFrame, df_events: DataFrame, df_ops: DataFrame)
     )
 
     # Derive analytics flags / measures
+    # Creating the final DataFrame for the Fact table
     fact = (
         picked
         .withColumn("in_maintenance_window", F.when(F.col("e.event_id").isNotNull(), F.lit(1)).otherwise(F.lit(0)))
