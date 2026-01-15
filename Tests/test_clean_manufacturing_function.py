@@ -2,7 +2,7 @@ import pytest
 from pyspark.sql import Row
 from pyspark.sql import functions as F
 
-from PySpark.pipeline import clean_manufacturing  # adjust if your package name differs
+from PySpark.pipeline import clean_manufacturing
 
 
 def test_clean_manufacturing_filters_defaults_and_dedup(spark):

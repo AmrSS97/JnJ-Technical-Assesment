@@ -25,7 +25,7 @@ def test_build_fact_sets_flags_and_joins_operator(spark):
             performance=0.95,
             quality=0.98,
             machine_state="Down",
-            downtime_reason="Unplanned Breakdown",   # should trigger breakdown flag
+            downtime_reason="Unplanned Breakdown", # should trigger breakdown flag
             maintenance_type="",
             maintenance_due_date="2025-01-10",
             vibration_mm_s=1.0,
@@ -95,13 +95,16 @@ def test_build_fact_sets_flags_and_joins_operator(spark):
             primary_shift="Day",
         )
     ]
-
+    
+    # Calling the clean funtions & passing the DataFrames created from the rows
     df_mfg = clean_manufacturing(spark.createDataFrame(mfg_rows))
     df_events = clean_events(spark.createDataFrame(events_rows))
     df_ops = clean_operators(spark.createDataFrame(ops_rows))
-
+    
+    # Building a fact table based on the resulting, clean DataFrames
     fact = build_fact_table(df_mfg, df_events, df_ops)
-
+    
+    # Selecting some fields & ordering them by order id to check the results
     rows = fact.select(
         "order_id",
         "in_maintenance_window",
