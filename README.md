@@ -1,5 +1,5 @@
 # Johnson&Johnson Data Engineering Adventure
-This repository is for the data engineering technical assessment, created &amp; owned by JnJ
+This repository is for the Data Engineering technical assessment, created &amp; owned by JnJ
 --------------------------------------------------------------------------------------------
 Welcome Onboard, it is good to have you join our Data Analytics Team. Get ready to dive deep into the world of data, specifically Data Engineering, where our job is to take care of a huge amount to data and provide it to be analytics ready. We clean & transform data from different sources and construct analytic-ready fact tables for our fellow Data Scientists, Data Analysts, & BI Engineers to use to come up with new insights.
 
@@ -11,7 +11,7 @@ Technologies used for the task
 * Databricks
 * pytest (Python testing framework)
 
-Steps To Run The Pipeline
+Steps to run the pipeline
 -------------------------
 * Create a Databricks account
 * Integrate your Databricks account with our Github repository
