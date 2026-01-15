@@ -75,3 +75,28 @@ To run the pipeline in Databricks, follow these steps:
    - Use `Task-3-Solution.pdf` for guidance
 7. (Optional) Add a notebook task to explore or visualize the results using Databricks display() function
 8. Run the job to execute the full pipeline
+
+## Assumptions
+
+- Source data has already been ingested from an external system  
+  (for example: Snowflake, Google Drive, or another upstream pipeline)
+- This pipeline focuses on data transformation and preparation rather than ingestion
+- Databricks Volumes are used for both input and output storage to keep the solution simple and self-contained
+
+---
+
+## Design Notes
+
+- The pipeline prioritizes **clarity, simplicity, and maintainability**
+- Databricks is used as both the processing and storage layer
+- External integrations (such as publishing results to Snowflake) are intentionally out of scope for this exercise
+
+---
+
+## Final Notes
+
+This repository is intended to be easy to understand and extend.  
+New team members are encouraged to explore the code, review the unit tests, and build on top of the existing pipeline.
+
+Welcome again, and happy coding! 🚀
+
